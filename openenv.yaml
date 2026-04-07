@@ -1,0 +1,39 @@
+version: "1.0"
+name: "customer-support-simulator"
+description: "A real-world simulation of a customer support agent handling refunds and escalations."
+type: "real-world"
+entrypoint: "main:app"
+
+tasks:
+  - id: 0
+    name: "Easy Refund"
+    description: "Handle a simple refund request politely."
+    max_score: 1.0
+  - id: 1
+    name: "Medium Frustration"
+    description: "De-escalate a frustrated customer."
+    max_score: 1.0
+  - id: 2
+    name: "Hard Escalation"
+    description: "Properly escalate a complex issue to a manager."
+    max_score: 1.0
+
+observation_space:
+  type: object
+  properties:
+    conversation:
+      type: array
+      items:
+        type: object
+    step_count:
+      type: integer
+    current_customer_query:
+      type: string
+
+action_space:
+  type: object
+  properties:
+    response:
+      type: string
+
+baseline_script: "inference_runner.py"
