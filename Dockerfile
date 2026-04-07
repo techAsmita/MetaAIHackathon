@@ -1,7 +1,5 @@
-# Use a slim version of Python to keep the build fast
-FROM python:3.9-slim
+FROM python:3.10-slim
 
-# Set the working directory inside the container
 WORKDIR /app
 
 # 1. Install system dependencies if needed
