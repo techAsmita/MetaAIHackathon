@@ -1,21 +1,16 @@
-[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
-name = "metaai-customer-support-simulator"
+name = "meta-support-env"
 version = "0.1.0"
-description = "AI Customer Support Simulator for Meta AI OpenEnv Hackathon"
-readme = "README.md"
-requires-python = ">=3.9"
 dependencies = [
+    "openenv>=0.2.0",
+    "openenv-core>=0.2.0",
     "fastapi",
-    "uvicorn",
-    "pydantic",
-    "requests",
-    "openai",
-    "python-dotenv"
+    "uvicorn"
 ]
 
-[tool.setuptools]
-packages = ["env"]
+[project.scripts]
+server = "main:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
