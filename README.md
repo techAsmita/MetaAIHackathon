@@ -34,3 +34,22 @@ The simulator places an AI agent in a support role where it must resolve multi-t
 1. **Build Container**:
    ```bash
    docker build -t support-env .
+
+## 🛠️ Installation & Usage
+```bash
+# Clone the repository
+git clone https://github.com
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the OpenEnv API
+uvicorn main:app --host 0.0.0.0 --port 8000
+
+## Note regarding lib/ files: Due to GitHub's file limit constraints, the complete lib/ dependency folder (containing over 100+ files) was not directly committed to this repository. However, all necessary dependencies are fully documented in requirements.txt and are automatically handled by the provided Dockerfile during deployment.
+
+## 🚀 Deployment
+This project is optimized for Hugging Face Spaces using Docker.
+SDK: Docker
+App Port: 8000
+Tag: openenv
