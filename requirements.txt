@@ -1,6 +1,9 @@
 # Mandatory OpenEnv Dependencies
 openenv>=0.1.13
-openenv-core>=0.1.13
+openenv-core>=0.1.0
+
+# Build System (Required for pyproject.toml)
+hatchling
 
 # API and Framework
 fastapi
