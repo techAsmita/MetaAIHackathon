@@ -1,7 +1,14 @@
+# Mandatory OpenEnv Dependencies
+openenv>=0.1.13
+openenv-core>=0.1.13
+
+# API and Framework
 fastapi
 uvicorn
 pydantic
 requests
+
+# Optional / Project Specific
 openai
 streamlit
 python-dotenv
