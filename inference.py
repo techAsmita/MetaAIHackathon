@@ -80,8 +80,13 @@ class CustomerSupportEnv:
         if task["key"] in r:
             score += 0.7
 
-        return min(score, 1.0)
+        #  ensure score strictly between (0,1)
+        if score >= 1.0:
+            score = 0.95
+        elif score <= 0.0:
+            score = 0.05
 
+        return score
 
 # THIS IS CRITICAL → evaluator runs THIS
 if __name__ == "__main__":
