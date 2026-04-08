@@ -18,4 +18,4 @@ COPY . .
 EXPOSE 8000
 
 # 5. Start the server (Required for Meta AI Validation)
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "inference_runner.py"]
