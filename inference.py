@@ -1,6 +1,5 @@
 from typing import List, Dict, Tuple
 from env.models import Observation, Action 
-import sys
 
 class CustomerSupportEnv:
     def __init__(self):
@@ -9,6 +8,7 @@ class CustomerSupportEnv:
             {"id": 1, "name": "Medium_Frustration", "query": "I am frustrated", "key": "apologize"},
             {"id": 2, "name": "Hard_Escalation", "query": "I want to escalate", "key": "manager"}
         ]
+        self.started = False  #  fix duplicate START
         self.reset()
 
     def reset(self, task_index: int = 0) -> Observation:
@@ -17,10 +17,12 @@ class CustomerSupportEnv:
         self.current_task_index = task_index % len(self.tasks)
         task = self.tasks[self.current_task_index]
         self.current_query = task["query"]
-        
-        #MANDATORY: Print [START] block for the validator
-        print(f"[START] task={task['name']}", flush=True)
-        
+
+        #  PRINT START ONLY ONCE
+        if not self.started:
+            print(f"[START] task={task['name']}", flush=True)
+            self.started = True
+
         return self.get_observation()
 
     def step(self, action: Action) -> Tuple[Observation, float, bool, Dict]:
@@ -30,14 +32,15 @@ class CustomerSupportEnv:
 
         reward = float(self.compute_reward(response_text))
         done = True 
-        
-        #MANDATORY: Print [STEP] block for the validator
+
         print(f"[STEP] step={self.step_count} reward={reward}", flush=True)
-        
-        #MANDATORY: Print [END] block if the task is finished
+
         if done:
             task_name = self.tasks[self.current_task_index]["name"]
             print(f"[END] task={task_name} score={reward} steps={self.step_count}", flush=True)
+
+            #  RESET FLAG FOR NEXT TASK
+            self.started = False
 
         return self.get_observation(), reward, done, {}
 
@@ -59,8 +62,11 @@ class CustomerSupportEnv:
         score = 0.0
         r = response.lower()
         task = self.tasks[self.current_task_index]
+
         if any(word in r for word in ["sorry", "apologize", "understand"]):
             score += 0.3
+
         if task["key"] in r:
             score += 0.7
+
         return min(score, 1.0)
