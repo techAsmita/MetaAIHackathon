@@ -80,7 +80,14 @@ class CustomerSupportEnv:
         if task["key"] in r:
             score += 0.7
 
-        score = max(0.01, min(score, 0.99))
+        # FINAL GUARANTEE (no chance of 0 or 1)
+        if score >= 1.0:
+            score = 0.95
+        elif score <= 0.0:
+            score = 0.05
+
+        # EXTRA SAFETY (handles float weirdness)
+        score = min(max(score, 0.05), 0.95)
 
         return float(score)
 
