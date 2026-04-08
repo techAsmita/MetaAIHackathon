@@ -80,7 +80,7 @@ class CustomerSupportEnv:
         if task["key"] in r:
             score += 0.7
 
-        #  ensure score strictly between (0,1)
+        # CRITICAL FIX
         if score >= 1.0:
             score = 0.95
         elif score <= 0.0:
