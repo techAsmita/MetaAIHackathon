@@ -1,9 +1,3 @@
-import os
-
-# STOP THIS FILE DURING EVALUATION
-if os.getenv("RUN_ENV") == "runner":
-    exit()
-
 from fastapi import FastAPI, HTTPException
 from inference import CustomerSupportEnv
 from env.models import Action, Observation, State
@@ -14,6 +8,7 @@ env = CustomerSupportEnv()
 @app.post("/reset", response_model=Observation)
 def reset(task_id: int = 0):
     try:
+        env.from_api = True  # Prevent START print
         return env.reset(task_index=task_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
