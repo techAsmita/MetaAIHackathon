@@ -12,10 +12,7 @@ def grade(response):
     if len(response) > 20:
         score += 0.3
 
-    # CRITICAL FIX
-    if score >= 1.0:
-        score = 0.95
-    elif score <= 0.0:
-        score = 0.05
+    # FINAL SAFE CLAMP
+    score = max(0.01, min(score, 0.99))
 
-    return score
+    return float(score)
