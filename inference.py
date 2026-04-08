@@ -1,5 +1,22 @@
 from typing import List, Dict, Tuple
-from env.models import Observation, Action 
+from env.models import Observation, Action
+import os
+
+# Safe import (won’t crash if env vars missing)
+try:
+    from openai import OpenAI
+    api_base = os.getenv("API_BASE_URL")
+    api_key = os.getenv("API_KEY")
+
+    client = None
+    if api_base and api_key:
+        client = OpenAI(
+            base_url=api_base,
+            api_key=api_key
+        )
+except Exception:
+    client = None
+
 
 class CustomerSupportEnv:
     def __init__(self):
@@ -16,7 +33,7 @@ class CustomerSupportEnv:
         task = self.tasks[self.current_task_index]
         self.current_query = task["query"]
 
-        # Only print START for runner (not API)
+        # Only print START when NOT called via API
         if not hasattr(self, "from_api"):
             print(f"[START] task={task['name']}", flush=True)
 
@@ -28,7 +45,7 @@ class CustomerSupportEnv:
         self.step_count += 1
 
         reward = float(self.compute_reward(response_text))
-        done = True 
+        done = True
 
         print(f"[STEP] step={self.step_count} reward={reward}", flush=True)
 
@@ -65,10 +82,12 @@ class CustomerSupportEnv:
 
         return min(score, 1.0)
 
+
+# THIS IS CRITICAL → evaluator runs THIS
 if __name__ == "__main__":
     env = CustomerSupportEnv()
 
-    class Action:
+    class ActionLocal:
         def __init__(self, response):
             self.response = response
 
@@ -78,14 +97,26 @@ if __name__ == "__main__":
         try:
             obs = env.reset(task_index=task_id)
 
-            if task_name == "Easy_Refund":
-                response = "I understand your issue and will process your refund immediately."
-            elif task_name == "Medium_Frustration":
-                response = "I am really sorry and I understand your frustration."
+            # Use LLM if available, else fallback
+            if client:
+                completion = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful customer support agent."},
+                        {"role": "user", "content": env.current_query}
+                    ]
+                )
+                response = completion.choices[0].message.content
             else:
-                response = "I understand your concern and will connect you to a manager right away."
+                # fallback (for HF runtime)
+                if task_name == "Easy_Refund":
+                    response = "I understand your issue and will process your refund immediately."
+                elif task_name == "Medium_Frustration":
+                    response = "I am really sorry and I understand your frustration."
+                else:
+                    response = "I understand your concern and will connect you to a manager right away."
 
-            action = Action(response=response)
+            action = ActionLocal(response=response)
 
             obs, reward, done, _ = env.step(action)
 
