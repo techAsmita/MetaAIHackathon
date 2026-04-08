@@ -13,9 +13,9 @@ st.title("🤖 AI Customer Support Simulator")
 # Show chat messages
 for role, msg in st.session_state.messages:
     if role == "Customer":
-        st.markdown(f"**🧑 Customer:** {msg}")
+        st.markdown(f"** Customer:** {msg}")
     else:
-        st.markdown(f"**🤖 Agent:** {msg}")
+        st.markdown(f"** Agent:** {msg}")
 
 # Input
 user_input = st.text_input("Enter customer message")
