@@ -1,6 +1,3 @@
-import os
-import time
-
 from inference import CustomerSupportEnv
 
 class Action:
@@ -33,9 +30,4 @@ def run_baseline():
 
 
 if __name__ == "__main__":
-    # RUN ONLY ONCE
     run_baseline()
-
-    # BLOCK CONTAINER FOREVER (CRITICAL FIX)
-    while True:
-        time.sleep(1000)
