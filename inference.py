@@ -1,45 +1,47 @@
 from typing import List, Dict, Tuple
 from env.models import Observation, Action 
+import sys
 
 class CustomerSupportEnv:
     def __init__(self):
-        # 3 tasks with unique 'keys' to ensure score variance across difficulties
         self.tasks = [
-            {"id": 0, "name": "Easy Refund", "query": "I want a refund", "key": "refund"},
-            {"name": "Medium Frustration", "query": "I am frustrated", "key": "apologize"},
-            {"name": "Hard Escalation", "query": "I want to escalate", "key": "manager"}
+            {"id": 0, "name": "Easy_Refund", "query": "I want a refund", "key": "refund"},
+            {"id": 1, "name": "Medium_Frustration", "query": "I am frustrated", "key": "apologize"},
+            {"id": 2, "name": "Hard_Escalation", "query": "I want to escalate", "key": "manager"}
         ]
         self.reset()
 
     def reset(self, task_index: int = 0) -> Observation:
-        """Standard OpenEnv reset: cleans state and sets the task."""
-        self.history: List[Dict[str, str]] = []
-        self.step_count: int = 0
-        self.current_task_index: int = task_index % len(self.tasks)
-        self.current_query: str = self.tasks[self.current_task_index]["query"]
+        self.history = []
+        self.step_count = 0
+        self.current_task_index = task_index % len(self.tasks)
+        task = self.tasks[self.current_task_index]
+        self.current_query = task["query"]
+        
+        #MANDATORY: Print [START] block for the validator
+        print(f"[START] task={task['name']}", flush=True)
+        
         return self.get_observation()
 
     def step(self, action: Action) -> Tuple[Observation, float, bool, Dict]:
-        """Standard OpenEnv step: processes action and returns (obs, reward, done, info)."""
-        # action is now the Pydantic model we defined
         response_text = action.response
-        
-        self.history.append({
-            "agent": response_text,
-            "customer": self.current_query
-        })
+        self.history.append({"agent": response_text, "customer": self.current_query})
         self.step_count += 1
 
-        # Calculate shaped reward (0.0 to 1.0)
-        reward = self.compute_reward(response_text)
-        
-        # In this simulator, one response completes the task
+        reward = float(self.compute_reward(response_text))
         done = True 
         
-        return self.get_observation(), float(reward), done, {}
+        #MANDATORY: Print [STEP] block for the validator
+        print(f"[STEP] step={self.step_count} reward={reward}", flush=True)
+        
+        #MANDATORY: Print [END] block if the task is finished
+        if done:
+            task_name = self.tasks[self.current_task_index]["name"]
+            print(f"[END] task={task_name} score={reward} steps={self.step_count}", flush=True)
+
+        return self.get_observation(), reward, done, {}
 
     def get_observation(self) -> Observation:
-        """Helper to return the typed Observation model."""
         return Observation(
             conversation=self.history,
             step_count=self.step_count,
@@ -47,7 +49,6 @@ class CustomerSupportEnv:
         )
 
     def state(self):
-        """Standard OpenEnv state method."""
         return {
             "current_task_index": self.current_task_index,
             "step_count": self.step_count,
@@ -55,17 +56,11 @@ class CustomerSupportEnv:
         }
 
     def compute_reward(self, response: str) -> float:
-        """Deterministic grader with variable signal (Phase 2 requirement)."""
         score = 0.0
         r = response.lower()
         task = self.tasks[self.current_task_index]
-
-        # 1. Base Professionalism (partial reward)
         if any(word in r for word in ["sorry", "apologize", "understand"]):
             score += 0.3
-        
-        # 2. Task Accuracy (weighted signal)
         if task["key"] in r:
             score += 0.7
-            
         return min(score, 1.0)
