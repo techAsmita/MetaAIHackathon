@@ -8,8 +8,6 @@ class CustomerSupportEnv:
             {"id": 1, "name": "Medium_Frustration", "query": "I am frustrated", "key": "apologize"},
             {"id": 2, "name": "Hard_Escalation", "query": "I want to escalate", "key": "manager"}
         ]
-        self.started = False  #  fix duplicate START
-        self.reset()
 
     def reset(self, task_index: int = 0) -> Observation:
         self.history = []
@@ -18,10 +16,9 @@ class CustomerSupportEnv:
         task = self.tasks[self.current_task_index]
         self.current_query = task["query"]
 
-        #  PRINT START ONLY ONCE
-        if not self.started:
+        # Only print START for runner (not API)
+        if not hasattr(self, "from_api"):
             print(f"[START] task={task['name']}", flush=True)
-            self.started = True
 
         return self.get_observation()
 
@@ -38,9 +35,6 @@ class CustomerSupportEnv:
         if done:
             task_name = self.tasks[self.current_task_index]["name"]
             print(f"[END] task={task_name} score={reward} steps={self.step_count}", flush=True)
-
-            #  RESET FLAG FOR NEXT TASK
-            self.started = False
 
         return self.get_observation(), reward, done, {}
 
